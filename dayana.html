@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sensores</title>
+
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
+    <script type="text/javascript" src="cordova.js"></script>
+
+    <script type="text/javascript">
+
+        window.load = function() {
+
+            $("#exibeHardware").hide();
+            $("#exibeRede").hide();
+            $("#exibeBateria").hide();
+            $("#exibeAcelerometro").hide();
+
+            function iniciar() {
+
+                navigator.vibrate([100]);
+            }
+
+            function hardware() {
+
+                navigator.vibrate([300]);
+                $("#exibeHardware").show();
+                $("#exibeRede").hide();
+                $("#exibeBateria").hide();
+                $("#exibeAcelerometro").hide();
+                $("#circulo").hide();
+                
+                saida = "";
+                saida += "Modelo do dispositivo: " + device.model;
+                saida += "<br> Sistema Operacional: " + device.platform;
+                saida += "<br> Versão do S.O.: " + device.version;
+                saida += "<br> Fabricante: " + device.manufacturer;
+                saida += "<br> Serial: " + device.serial;
+
+                $("exibeHardware").html(saida);
+            }
+
+            function rede() {
+
+                navigator.vibrate([300]);
+                $("#exibeHardware").hide();
+                $("#exibeRede").show();
+                $("#exibeBateria").hide();
+                $("#exibeAcelerometro").hide();
+                $("#circulo").hide();
+
+                var rede = navigator.connection.type;
+                var tipo = {};
+
+                tipo[Connection.UNKNOWN] = "Conexão desconhecida";
+                tipo[Connection.ETHERNET] = "Conexão à cabo";
+                tipo[Connection.CELL_2G] = "Conexão 2G";
+                tipo[Connection.CELL_3G] = "Conexão 3G";
+                tipo[Connection.CELL_4G] = "Conexão 4G";
+                tipo[Connection.CELL] = "Rede celular";
+                tipo[Connection.WIFI] = "Conexão Wi-Fi";   
+                tipo[Connection.NONE] = "Nenhuma conexão";
+                
+                $("#exibeRede").html(tipo[rede]);
+
+            }
+
+            function bateria() {
+
+                navigator.vibrate([300]);
+                $("#exibeHardware").hide();
+                $("#exibeRede").hide();
+                $("#exibeBateria").show();
+                $("#exibeAcelerometro").hide();
+                $("#circulo").hide();
+
+                navigator.getBattery().then(function(battery)
+                {
+                    $("exibeBateria").html("Nível de bateria: " + battery.level * 100 + "%");
+                    battery.onlevelchange = function (){
+                        $("exibeBateria").html("Nível de bateria: " + battery.level * 100 + "%")
+                    }
+                })
+            }
+
+            function acel() {
+
+                navigator.vibrate([300]);
+                $("#exibeHardware").hide();
+                $("#exibeRede").hide();
+                $("#exibeBateria").hide();
+                $("#exibeAcelerometro").show();
+
+                if(window.DeviceOrientationEvent) {
+
+                    window.addEventListener('deviceorientation', function(event) {
+
+                        var x = Math.round(event.gamma);
+                        var y = Math.round(event.beta);
+                        var r = Math.round(event.alpha);
+
+                        var saida = "Eixo x: " + x;
+                        saida += "<br> Eixo y: " + y;
+                        saida += "<br> Rotação:" + r;
+
+                        $("#exibeAcelerometro").html(saida);
+                        $("#circulo").show();
+                        atualX = $("#circulo").offset().left;
+                        atualY = $("#circulo").offset().top;
+                        
+                        novaX = atualX + x;
+                        novaY = atualY + y;
+
+                        $("#circulo").offset(({left:novaX, top:novaY}))
+                    }, true)
+                }
+
+                else alert("Recurso não disponível no seu dispositivo!!!");
+            }
+
+            function sair() {
+
+                navigator.notification.confirm("Deseja sair do aplicativo?", resposta, "Mensagem", ['Não', 'Sim'])
+            }
+            function resposta(r) {
+                if (r == 2) navigator.app.exitApp();
+            }
+        }
+    </script>
+
+    <style href="css/"></style>
+    <style rel="stylesheet" type="text/css" href="css/jquery: .mobile -1.4em 0.5em .min .css;">
+        #rodape {
+            position: absolute;
+            width: 100%;
+            bottom: 0;
+        }
+
+        #circulo {
+            border-radius: 100%;
+            border: 5px solid red;
+            width: 100px;
+            height: 100px;
+            background-color: azure;
+        }
+    </style>
+</head>
+<body>
+    <div data-role="page" id="principal">
+        <div data-role="reader">
+            <h1>Sensores Hardware</h1>
+        </div>
+        <div data-role="main" id="conteudo" class="ui-content">
+            <button id="btn1" onclick="location.href='index.html#hardware'">Hardware Rede</button>
+            <button id="btn7" onclick="sair()">Sair</button>
+        </div>
+        <div data-role="footer" id="rodape">
+            <h1>App Sensores</h1>
+        </div>
+        <div data-role="page" id="hardware">
+            <div data-role="header">
+                <h1>Sensores</h1>
+            </div>
+            <div data-role="main" id="conteudo" class="ui-content">
+                <div id="exibeHardware"></div>
+                <div id="exibeRede"></div>
+                <div id="exibeBateria"></div>
+                <div id="exibeAcelerometro"></div>
+                <div id="circulo"></div>
+
+                <button id="btn2" onclick="hardware()">Exibir Hardware </button>
+                <button id="btn3" onclick="rede()"> Exibir Rede </button>
+                <button id="btn4" onclick="bateria()"> Exibir Bateria </button>
+                <button id="btn5" onclick="acel()"> Exibir Acelerômetro </button>
+                <button id="btn6" onclick="location.href='index.html#principal'"> Voltar </button>
+            </div>
+            <div data-role="footer" id="rodape">
+                <h1>App Sensores</h1>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
